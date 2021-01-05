@@ -2,7 +2,7 @@ from bases import session
 from entityView import EntityView
 from CUI.cui import CUI
 from models.books import Book
-from models.exemplar import Exemplar
+from models.exemplars import Exemplar
 from models.readers import Reader
 
 

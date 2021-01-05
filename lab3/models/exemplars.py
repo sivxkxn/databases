@@ -5,9 +5,9 @@ from bases import Base
 class Exemplar(Base):
     __tablename__ = 'Exemplar'
 
-    exemplar_id = Column(Integer, primary_key=True)
-    book_fk = Column(Integer, ForeignKey('Book.book_id'))
-    reader_fk = Column(Integer, ForeignKey('Reader.reader_id'))
+    id = Column(Integer, primary_key=True)
+    book_fk = Column(Integer, ForeignKey('Book.id'))
+    reader_fk = Column(Integer, ForeignKey('Reader.id'))
     date_from = Column(Date, default=func.now())
     date_to = Column(Date, default=func.now())
 

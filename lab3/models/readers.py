@@ -1,12 +1,12 @@
 from sqlalchemy import Column, Integer, String, Date, func, ForeignKey
 from sqlalchemy.orm import relationship, backref
-from model.links import links_books_association
+from models.links import links_books_association
 from bases import Base
 
 class Reader(Base):
     __tablename__ = 'Reader'
 
-    reader_id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True)
     name = Column(String)
     surname = Column(String)
     phone = Column(Integer)

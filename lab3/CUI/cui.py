@@ -1,9 +1,54 @@
 import os
-import utils.console as console
-from CUI.menuTree import Node
+#import utils.console as console
+import os
+import sys
 
+#console utils:
+def printBold(str):
+    BOLD = '\33[7m'
+    CEND = '\033[0m'
+    print(BOLD + str + CEND)
+
+def clear():
+    os.system('cls' if os.name == 'nt' else 'clear')
+
+def getch():
+    if os.name == 'nt':
+        import msvcrt
+        return msvcrt.getch()
+    else:
+        import tty
+        import termios
+        fd = sys.stdin.fileno()
+        old_settings = termios.tcgetattr(fd)
+        try:
+            tty.setraw(sys.stdin.fileno())
+            ch = sys.stdin.read(1)
+        finally:
+            termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+        return ch
+
+class Node(object):
+
+    def __init__(self, title, on_press):
+        self.title = title
+        self.on_press = on_press
+        self.childs = []
+        self.root = None
+
+
+    def append(self, *args):
+        try:
+            if len(args) == 1 and isinstance(args[0], Node):
+                args[0].root = self
+                self.childs.append(args[0])
+            if len(args) == 2 and isinstance(args[0], str):
+                newNode = Node(args[0], args[1])
+                newNode.root = self
+                self.childs.append(newNode)
+        except Exception as err:
+            print("Error! ", err)
 class CUI(object):
-
     def __setBreakStatus(self, status: bool):
         self.__isBreakON = status
 
@@ -14,7 +59,7 @@ class CUI(object):
 
 
         # support:
-        self.__BREAK_NODE = Node("BREAK", lambda: self.__setBreakStatus(False))
+        self.__BREAK_NODE = Node("EXIT", lambda: self.__setBreakStatus(False))
         self.__EMPTY_NODE = Node("", lambda: 0)
 
 
@@ -23,20 +68,18 @@ class CUI(object):
         self.__isBreakON = True
         self.__error = ''
 
-
-
     def __print(self):
-        console.clear()
+        clear()
         #custom items
-        print(f'-------{self.__currentNode.title}------- ' + self.__error)
+        print(f'----------{self.__currentNode.title}----------' + self.__error)
         for i in range(len(self.__currentNode.childs)):
             if i == self.__currentPos - 1:
-                console.printBold(f'[{self.__currentNode.childs[i].title}]')
+                printBold(f'[{self.__currentNode.childs[i].title}]')
             else:
                 print(f'[{self.__currentNode.childs[i].title}]')
 
     def __inputController(self):
-        return  console.getch()
+        return getch()
 
     def __stepController(self, char):
         upperLimit: int = len(self.__currentNode.childs)
@@ -58,14 +101,12 @@ class CUI(object):
         self.__currentNode = self.root
         exit_str = "EXIT"
         if len(args) > 0 and isinstance(args[0], str): exit_str = args[0]
-        if not (len(args) > 0 and isinstance(args[0], bool) and args[0] is False):
-            self.__currentNode.append(exit_str, lambda: self.__setBreakStatus(False))
-
+        self.__currentNode.append(exit_str, lambda: self.__setBreakStatus(False))
 
         while (self.__isBreakON):
             self.__print()
             self.__stepController(self.__inputController())
-        console.clear()
+        clear()
 
     def addField(self, title, *args):
         if len(args) > 0:
@@ -99,7 +140,6 @@ class CUI(object):
     def deleteField(self, title: str):
         try:
             if len(title) > 0:
-
                 for i in range(len(self.__currentNode.childs)):
                     if self.__currentNode.childs[i].title == title:
                         del self.__currentNode.childs[i]
@@ -107,8 +147,8 @@ class CUI(object):
         except Exception as err:
             print("Error! ", err)
 
-    def setError(self, err: str):
-        self.__error = err
+    def setError(self, msg: str):
+        self.__error = msg
 
     def stop(self):
         self.__setBreakStatus(False)
